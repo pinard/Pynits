@@ -11,6 +11,9 @@ BUILT = pynits.pot $(addsuffix .mo, $(LANGUAGES))
 all:
 	@echo "See the README file."
 
+clean:
+	rm -fv *~ *.mo pynits.pyc pynits.pot
+
 install:
 	@echo "Choose either \`install-user' or \`install-root'; see README."
 
@@ -86,10 +89,10 @@ i18ndir = /usr/share/doc/packages/python/Tools/i18n
 .SUFFIXES: .po .mo
 
 %.mo: %.po
-	$(PYTHON) $(i18ndir)/msgfmt.py $^
+	msgfmt -o $@ $^
 
 %.po: pynits.pot
 	msgmerge $@ $^ > $@-tmp && mv $@-tmp $@
 
 pynits.pot: pynits.py
-	$(PYTHON) $(i18ndir)/pygettext.py --docstrings --output=$@ pynits.py
+	xgettext -o $@ pynits.py
