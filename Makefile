@@ -5,13 +5,14 @@ INSTALL_DIR = $(INSTALL) -d -m 755
 INSTALL_DATA = $(INSTALL) -m 644
 
 LANGUAGES = fr es
+LANGUAGES = fr
 BUILT = pynits.pot $(addsuffix .mo, $(LANGUAGES))
 
 all:
 	@echo "See the README file."
 
 install:
-	@echo "Choose either `install-user' or `install-root'; see README."
+	@echo "Choose either \`install-user' or \`install-root'; see README."
 
 install-user:
 	$(MAKE) install-common VIMFILES=$(HOME)/.vim
