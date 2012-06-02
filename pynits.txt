@@ -94,12 +94,12 @@ different results whenever continuation lines are needed.  A few peculiarities
 of string formatting are listed separately, see |pynits-strings| below.
 
 Mapping equivalences:
-	\b	<Plug>Pynits_disposer_en_colonne
-	\c	<Plug>Pynits_disposer_en_colonne_remplir
-	\l	<Plug>Pynits_disposer_en_ligne
-	\p	<Plug>Pynits_disposer_en_retrait
-	\q	<Plug>Pynits_disposer_en_retrait_remplir
-	Q	<Plug>Pynits_disposer_en_retrait_remplir
+	\b	<Plug>Pynits_column_layout
+	\c	<Plug>Pynits_column_fill_layout
+	\l	<Plug>Pynits_line_layout
+	\p	<Plug>Pynits_retract_layout
+	\q	<Plug>Pynits_retract_fill_layout
+	Q	<Plug>Pynits_retract_fill_layout
 
 When any of the above command is given, the tool first tries to find
 the Python line containing the cursor.  A Python line, here, means
@@ -148,7 +148,7 @@ most aggressive variant for reformatting Python lines, useful enough to
 warrant "Q" as an alternate, easier key binding.  Our suggestion is that
 you start with "Q", and only attempt one of the others if you are not
 satisfied by the results.  Some bindings are named after their effect:
-"\l" requests a single line and "\c" favors columnar disposition.  To
+"\l" requests a single line and "\c" favors columnar layout.  To
 avoid refilling, go backwards one position in the alphabet: "\b" is like
 "\c" without refilling, and "\p" is like "\q" without refilling.  One
 may also notice that "\b", "\c", "\p" and "\q", listed in alphabetical
@@ -197,7 +197,7 @@ out of a Python line, and put either before it if the line does not end
 with a colon, or after it whenever the Python line ends with a colon.
 
 Mapping equivalences:
-	\f	<Plug>Pynits_choisir_remplisseur
+	\f	<Plug>Pynits_choose_filling_tool
 
 Command "\f" cycles through a few refilling algorithms for comments.
 By default, comment refilling is effected through the GNU `fmt' program,
@@ -221,8 +221,8 @@ will evade the issue and rest content with the `definition' of a nit as
 something I do not like! :-)
 
 Mapping equivalences:
-	\\	<Plug>Pynits_trouver_broutille
-	\.	<Plug>Pynits_corriger_broutille
+	\\	<Plug>Pynits_find_nit
+	\.	<Plug>Pynits_correct_nit
 
 This tool knows about many nits, and when asked to find one with "\\",
 it starts at the current line and move forward, looking for any instance
@@ -302,10 +302,10 @@ complain on the reformatted result.
 6. Other commands					*pynits-miscellaneous*
 
 Mapping equivalences:
-	\"	<Plug>Pynits_forcer_guillemets
-	\'	<Plug>Pynits_forcer_apostrophes
-	\(	<Plug>Pynits_ajouter_parentheses
-	\)	<Plug>Pynits_eliminer_parentheses
+	\"	<Plug>Pynits_force_double_quotes
+	\'	<Plug>Pynits_force_single_quotes
+	\(	<Plug>Pynits_add_parentheses
+	\)	<Plug>Pynits_remove_parentheses
 
 Command `\"' seeks for the next string delimited by single quotes after
 the cursor on the current line, and changes the delimiters to double
@@ -321,8 +321,8 @@ under the cursor and the matching bracket, even if the matching bracket
 was on a different line.
 
 Mapping equivalences:
-	\d	<Plug>Pynits_choisir_mise_au_point
-	\y	<Plug>Pynits_montrer_syntaxe
+	\d	<Plug>Pynits_choose_debug
+	\y	<Plug>Pynits_show_syntax
 
 These two commands are meant for the use of the maintainer of this tool
 in debugging.  Command "\d" cycles toggles debugging, which triggers
