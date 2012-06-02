@@ -169,6 +169,8 @@ def ajuster_codage():
     codage = vim.eval('&fileencoding') or vim.eval('&encoding')
     substitutions = {'latin1': 'ISO-8859-1'}
     codage = substitutions.get(codage, codage).lower()
+    if codage == 'utf-8':
+        return
     tampon = vim.current.buffer
     for index in 0, 1:
         if index < len(tampon):
@@ -2326,14 +2328,12 @@ class Fichier_Vide(Broutille):
     def corriger(self):
         # Insérer un squelette de programme Python.
         vim.current.buffer[:] = [
-            '#!/usr/bin/env python',
-            '# -*- coding: utf-8 -*-',
+            '#!/usr/bin/env python3',
             '',
             '"""\\',
             '',
             '"""',
             '',
-            '__metaclass__ = type',
             'import sys',
             '',
             'class Main:',
