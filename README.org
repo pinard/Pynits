@@ -1,0 +1,232 @@
+#+TITLE: Pynits — Notes
+#+OPTIONS: H:3
+#+SETUPFILE: ~/fp/notes/setup/pynits.org
+
+#+BEGIN_QUOTE
+[2012-05-31 jeu] I recently began to foresee that Pynits could be of some use in a project I'll be working on.  I'm not sure yet it is worth undusting.  To ponder this, I first extracted Pynits from FP etc. into its own GitHub project.  The next main steps would likely be the adaptation to the newer AST module, the design of some Pymacs interface so Pynits could be used from Emacs as well as from Vim, and of course, lots of testing and debugging.  I suspect that Python 2 versus Python 3 would create some more difficulties.  In any case, if this cannot be done reasonably quickly, which I'll soon began to evaluate, Pynits might return to hibernation for some while…
+#+END_QUOTE
+
+* README contents
+
+Pynits is a tool which I find useful while editing Python source code with Vim, for tidying up individual sources lines.  It is particularily helpful when formatting lines holding long or complex expressions.
+
+The documentation is kept in file [[http://fp-etc.progiciels-bpi.ca/pynits-doc.html][pynits.txt]], which you may browse or print, yet it is meant for the Vim help system.  Once the installation is completed as per the steps described below, and from within Vim, you may quickly get back to the documentation through the command::
+
+#+BEGIN_EXAMPLE
+:help pynits
+#+END_EXAMPLE
+
+Pynits messages are also available in French, given the *LANG* environment variable is =fr= or a variant of =fr=, before you call Vim.
+
+** On Windows or other non-Unix systems
+
+You likeley have fetched a [[https://github.com/pinard/Pynits/zipball/master][recent *.zip* archive]].  Choose the directory where you want the files installed.  This is normally one of the directories listed by VIM command:
+
+#+BEGIN_EXAMPLE
+:set runtimepath
+#+END_EXAMPLE
+
+Let's call it /DIRECTORY/.  Create /DIRECTORY/ if it does not exist and unzip the distribution you got into /DIRECTORY/.  For making the documentation available to VIM, execute VIM commands:
+
+#+BEGIN_EXAMPLE
+:helptags DIRECTORY/doc
+#+END_EXAMPLE
+
+replacing /DIRECTORY/ in the command above, of course.
+
+You have to manage in such a way that Python will successfully import
+file =python/pynits.py=.  One way is changing your Python
+installation so it will look in that directory.  See your Python
+documentation for knowing where the directory =site-packages/= is,
+then add these lines to file =.../site-packages/sitecustomize.py=:
+
+#+BEGIN_SRC python
+import sys
+sys.path.append('DIRECTORY/python')
+#+END_SRC
+
+once again replacing /DIRECTORY/ as appropriate, above.  Another way is to move the just installed file =python/pynits.py= into another directory on the Python import search path.  Pick a directory among those Python lists when you interactively execute:
+
+#+BEGIN_SRC python
+import sys
+print sys.path
+#+END_SRC
+
+A third way might be to preset *PYTHONPATH* in the environment so this variable points to =DIRECTORY/python=.
+
+Finally, you should edit file =DIRECTORY/ftplugin/python.vim= — create such a file if it does not exist already — and make sure it holds at least the following line:
+
+#+BEGIN_EXAMPLE
+python import pynits
+#+END_EXAMPLE
+
+** On Unix or Linux systems
+
+On Linux or other Unix systems, you might follow the instructions above, meant for non-Unix systems, they should work for Unix systems as well.  Or else, you may fetch a [[https://github.com/pinard/FP-etc/tarball/master][recent *.tar.gz* archive]].  You may either install this tool for yourself only, or for all users in your system.
+
+*** Personal installation
+
+This tool may be installed for yourself only, and this might be your only choice if you do not have super-user privileges.  Merely type *make install-user* from the unpacked Pynits distribution.  As a separate step, your =~/.vimrc= file should be modified, or created if necessary, so it holds the following lines:
+
+#+BEGIN_EXAMPLE
+if has('python')
+  python <<EOF
+import os, sys
+sys.path.append(os.path.expanduser('~/.vim/python'))
+EOF
+endif
+#+END_EXAMPLE
+
+*** System wide installation
+
+If you have super-user privileges, this tool may be installed system-wide, for all users.  Before doing so, you have to find out what is the *VIM* value for your installation.  Within Vim, ask:
+
+#+BEGIN_EXAMPLE
+:echo $VIM
+#+END_EXAMPLE
+
+Let's presume the listed value is /DIRECTORY/.  Then within a shell, execute the following command:
+
+#+BEGIN_SRC sh
+make install-root VIM=DIRECTORY
+#+END_SRC
+
+This will use =$VIM/vimfiles/=, which is the standard location for local site additions.  If you do not like this choice, then modify file Makefile as you see fit.
+
+You also have to manage so Python will know how to import modules from the =$VIM/vimfiles/python/= subdirectory.  You may find a few hints about how to do this by looking at the last half of the section `On Windows and other non-Unix systems`, above.
+
+** Reporting problems
+
+Email to [[mailto:pinard@iro.umontreal.ca][François Pinard]] for reporting documentation or execution bugs, or for sharing suggestions.
+* Usage in Vim
+
+Pynits is a useful tool while editing Python source code from within Vim, for tidying up individual sources lines, and doing some auxiliary tasks.  I find it particularly helpful when formatting lines containing long or complex expressions.  This tool requires a Python-enabled Vim.
+
+
+/Warning:/ This tool is in alpha state, its specifications may change.  Write to the author for corrections, suggestions or bug reports.
+
+** Introduction
+
+I once had to take over the maintenance of a set of big Python modules, written by someone without much concern about source line length limits, and also a bit lacking in the area of sound coding standards.  Trying to repair these things /manually/ in Vim promised to be extremely tedious, and the idea of this tool imposed itself as the only reasonable avenue.
+
+People develop religious feelings about source coding standards.  My personal coding practices, which are somewhat reflected in this tool, are surely debatable and questionable, yet I dare to think they grew reasonably well.  I use an eclectic choice of good ideas from various sources: the Python mode as written for GNU Emacs, the standard Python plugin for Vim, Guido's own style as he documented it, some relevant parts of GNU and Gnits standards, good horse sense, but also my own programming experience, accumulated for a good while by now.
+
+As source code lines are often carefully crafted by programmers, a reformatting tool may defeat local art work.  Reformatting is better fixed with an interactive scalpel, such as a tool like Vim can provide, than performed as a bulk or batch operation.  The programmer may then choose, on a line-by-line basis, to accept or reject the formatting suggestions made by this tool.
+
+There are three sets of commands in this tool.  A first set takes an entire line of Python source code (which may contain line continuations) and works hard at choosing a /best/ surface representation, completely rebuilt from its syntax tree.  A second set is meant to discover and report various formatting nits, and even to correct them when a correction recipe is known.  A final set contains random commands, usually for a few simple reformatting tasks.
+
+All Pynits commands start with the =<LocalLeader>=, which is =\= if the user did not change it.  All mapping equivalence tables, below, assume that the local leader has not been set to some other value.  You should change your reading of these maps if the leader happens to be different.
+
+This tool complies with the '=textwidth=' Vim option for the line length, but uses 80 if that option is set to zero.  The '=shiftwidth=' option also gives the number of columns per indentation step.
+
+Pynits is internally documented in French.  It is internationalised however, and produces English messages by default.  If the *LANG* environment variable is set to =fr=, messages will show in French.
+
+** Reformatting Python code
+
+The following commands distinguish between a set of white lines, a block of comments, or a group of physical lines representing a logical line of Python code.  They all have the purpose of producing a possibly different formatting of the same while preserving the execution semantics.
+
+If the cursor is on a white line, surrounding white lines are considered extraneous and deleted.  If the cursor is on a comment line, the entire comment block of which the line is a part is reformatted, see [[Handling comments]] below for more details on this.  Otherwise, the cursor is on a line of executable Python code, and the following commands may yield different results whenever continuation lines are needed.  A few peculiarities of string formatting are listed separately, see [[Handling strings]] below.
+
+Mapping equivalences:
+
+| \b | <Plug>Pynits\_column\_layout        |
+| \c | <Plug>Pynits\_column\_fill_layout   |
+| \l | <Plug>Pynits\_line\_layout          |
+| \p | <Plug>Pynits\_retract\_layout       |
+| \q | <Plug>Pynits\_retract\_fill\_layout |
+| Q  | <Plug>Pynits\_retract\_fill\_layout |
+
+When any of the above command is given, the tool first tries to find the Python line containing the cursor.  A Python line, here, means a set of physical lines in the buffer representing a single logical line, but possibly continued (either through an escaped-newline or an unbalanced bracket of any kind).  The Python line may start as far as a dozen physical lines before the cursor, and the Python line may hold as many as two hundred physical lines.  Beware that a physical line may look, on its own, like a valid Python statement, while it is really a continuation line.  This tool may be fooled by such cases, so it may happen that you ought to explicitly reposition the cursor on the first physical line of the whole Python line.  As the cursor is left on the physical line following the Python line after the operation, this gives you a good indication of what the tool determined to be a Python line.
+
+Command =\l= reformats the Python line into a single physical line, and for this command only, with no limit for the line length.  This command is meant as a first step when the programmer wants to fully hand-craft the formatting.
+
+Command =\b= reformats the Python line so to vertically align continuation lines into a column, the position of which is selected to best reflect the syntactic structure of a statement or expression.  In contrast to this, command =\p= will align continuation lines by indenting the margin by a fixed amount.  This is a bit less legible, yet still acceptable as it may save a few continuation lines.  However, if =\p= and =\b= would result in exactly the same number of continuation lines in the processed file, the =\p= command is (recursively) over-ridden by the =\b= command.  (This is because the cost of reduced legibility that results from the use of =\p= is only worth paying if fewer continuation lines result.)
+
+Command =\c= is the same as =\b= with refilling, while command =\q= is the same as =\p= with refilling.  Refilling is an operation by which continuation lines are combined after having been produced, provided this is natural and meaningful enough.  Here as well, refilling may represent some loss in legibility, but so might the use of too much vertical space, so refilling may often be a worthwhile compromise.  Heuristics may sometimes fail to find a formatting solution with =\c= or =\q=, and when this happens, reformatting is automatically retried with filling disabled, a bit as if =\b= or =\p= have been used instead.
+
+How one remembers all these letters? =\q= has been chosen after =gq=, which is the standard Vim command for reformatting text. =\q= is the most aggressive variant for reformatting Python lines, useful enough to warrant =Q= as an alternate, easier key binding.  Our suggestion is that you start with =Q=, and only attempt one of the others if you are not satisfied by the results.  Some bindings are named after their effect: =\l= requests a single line and =\c= favors columnar layout.  To avoid refilling, go backwards one position in the alphabet: =\b= is like =\c= without refilling, and =\p= is like =\q= without refilling.  One may also notice that =\b=, =\c=, =\p= and =\q=, listed in alphabetical order, use from least to most complex reformatting heuristics.
+
+** Handling strings
+
+This tool pays special attention to string formatting.  Here are a few of the principles it tries to follow:
+
+- Strings which represent natural language use double-quotes (") as external delimiters, others use single-quotes ('). The heuristic used to detect natural language strings is simplistic: there should be a word of four letters or more, at least one space is required, and there should be at least three times more letters than non-letters.
+
+- Isolated strings occur when a Python line contains a string and nothing else.  Such isolated strings are blindly taken as doc-strings, and so, are rendered with a triple-quoted string.  If this annoys you, add a comma after the string before formatting the line (this transforms the string into a 1-tuple), and remove that comma afterwards.
+
+- Whenever a triple-quoted string is the most economical avenue for vertical space, all lines share the same left margin.  This means in particular that the opening triple-quote is always followed by a backslash, and the string contents may never start on the same line.
+
+- Raw strings are produced whenever this shortens string contents.
+
+- String may be broken into a concatenated set of strings, one per line.  When this occurs, all strings use the same delimiters and /rawness/.  The split occurs between words, any white space sticks with the following word at such split points.  A split point is always forced after an embedded =\n=.
+
+- Escape sequences are avoided for non-ASCII letters.  It is assumed that the *coding* pragma of the whole file is compatible with such letters.  (This should likely be cross-checked with Vim current encoding of buffer.)
+
+** Handling comments
+
+This tool does not like in-line comments.  All comments are extracted out of a Python line, and put either before it if the line does not end with a colon, or after it whenever the Python line ends with a colon.
+
+Mapping equivalences:
+
+| \f | <Plug>Pynits\_choose_filling\_tool |
+
+Command =\f= cycles through a few refilling algorithms for comments.  By default, comment refilling is effected through the GNU *fmt* program, which needs to be installed in the system for this procedure to work (most Linux systems have it bundled already): it seems to me that wherever it fits, this is the tool producing the nicest output.  The second algorithm uses the *par* program, which despite yielding results a bit less nice than *fmt*, is more clever in some circumstances of complex quoting or so-called boxed comments.  The third algorithm uses the Vim built-in paragraph reformatter, which seems a bit less interesting, but it may only be that I have not studied it very much yet.  The fourth and last algorithm is the *textwrap* module from the Python 2.3 distribution; in practice so far, it does not seem fully up to the task.
+
+** Finding nits
+
+The exact nature of formatting nits is difficult to formalize, so I will evade the issue and rest content with the /definition/ of a nit as something I do not like! ☺
+
+Mapping equivalences:
+
+| \\ | <Plug>Pynits\_find\_nit    |
+| \. | <Plug>Pynits\_correct\_nit |
+
+This tool knows about many nits, and when asked to find one with =\\=, it starts at the current line and move forward, looking for any instance of such a nit.  Once a nit is found by =\\=, the user may choose to edit the code or to otherwise move the cursor before issuing another =\\= command.  When this is the case, the seek process for a nit resumes at the beginning of the current line.  This guards against the possibility that the correction of one nit might introduce another nit that goes undetected.  Otherwise, if the user immediately issues another =\\= command without changing anything, the tool assumes that the user decided to ignore the recently found nit, and so, the seek process resumes after the text of that nit.
+
+When a nit is found, it is highlighted, and explained in the status line.  However, merely because I do not know how to do it any better, all textual contents similar to the nit are also highlighted.  But the nit really resides at the cursor location.  Simply ignore the other instances of highlighted text.
+
+Command =\.= asks for the most recently found nit to be corrected.  When the nit processor does not know how to automatically correct a nit, it merely asks for human intervention.  Else, a change is made to get rid of the nit.  If that change is semantically-safe (that is, when it just cannot alter the meaning of the program), the next nit is automatically sought exactly as if the user typed =\\=. Otherwise, the cursor is left after the change for the user to check, and undo if not accepted.
+
+Here is a quick description of known nits and how they are corrected.  A first set of nits is related to white space.  An empty file is replaced by the prototype of a program.  A sequence of white lines is reduce to a single one.  TABs are not allowed in a source: they are replaced by eight spaces in the left margin, or the escape sequence =\t= elsewhere.  A sequence of spaces between tokens is replaced by a single space.  Trailing spaces on a line are removed.  Escaped newlines are unescaped.  Spaces are not allowed after an opening parenthesis (or similar character) or before a closing one.  Spaces are forbidden before a comma (or similar character), but required after one.  Spaces are expected before and after an assignment symbol or comparison operator.
+
+A second set of nits is related to various lexical issues.  In-lined comments are collected and all reported either after or before the Python line, depending if the Python line ends with a colon, or not; a mild attempt is also made at turning them into proper sentences.  Operators are much easier to grasp when read at the beginning of Python lines than at their end (strangely, this is not known enough!).  Double-quoted strings are ideally be reserved to natural language text.  Triple-quoted strings should have their delimiters on separate lines whenever possible.  A peculiar (and uncommon) date French format is especially recognised and such dates are turned to ISO 8601.
+
+A third set of nits is related to syntactic issues, which imply full reformatting, as if =\q= command was given.  As a special case, lines going over text witdth are reformatted with no other change.  The *apply* function is replaced with the =*arguments= notation.  The *find* function used to check string inclusion is replaced with *in* operator.  The *has\_key* function is replaced with *in* operator.  The *print* statement is replaced by a call to *sys.stdout.write* or such (this is under the assumption that *print* should be reserved for debugging).  Functions of the *string* module are replaced by string methods.
+
+A final set of nits is related to syntactic issues, while not implying full reformatting.  Moreover, many of these nits may only be corrected by humans, and are better revised by them.  The *close*, *eval*, *execfile*, *input*, *iterkeys*, *keys*, *readlines* and *xreadlines* functions, as well as the *exec*, *global* and *import* =*= statements, are often better avoided.  So are comparisons with the result of the *type* function.  Function *items* is often better written *iteritems*, *open* written *file*, *values* written *itervalues*.
+
+The Python line reformatter may sometimes produce output which may be nit-picked, for the sake of strictly protecting the semantics.  For example, if a doc-string does not end with a newline, the reformatter will not allow itself to add one.  But then, the nit-picker will likely complain on the reformatted result.
+
+** Other commands
+
+Mapping equivalences:
+
+| \" | <Plug>Pynits\_force\_double_quotes |
+| \' | <Plug>Pynits\_force\_single_quotes |
+| \( | <Plug>Pynits\_add\_parentheses     |
+| \) | <Plug>Pynits\_remove\_parentheses  |
+
+Command \" seeks for the next string delimited by single quotes after the cursor on the current line, and changes the delimiters to double quotes.  Command \' similarly changes a double-quoted string into a single-quoted string.  The /raw/ attribute is decided automatically.
+
+Command =\(= adds an opening round parenthesis under the cursor, and a closing round parenthesis at the end of the physical line.  If the line ends with a colon, the closing parenthesis is added before the colon instead of after it.  Command =\)= only works if the cursor sits over an opening or closing bracket of any kind, it deletes both the bracket under the cursor and the matching bracket, even if the matching bracket was on a different line.
+
+Mapping equivalences:
+
+| \d | <Plug>Pynits\_choose\_debug |
+| \y | <Plug>Pynits\_show\_syntax  |
+
+These two commands are meant for the use of the maintainer of this tool in debugging.  Command =\d= cycles toggles debugging, which triggers quite verbose output.  Command =\y= does not do any formatting, but merely dumps the syntactic tree of the selected Python line.
+
+** Caveats and future
+
+Reformatting a Python line might not always yield the result you would have hand-crafted.  One reason is that taste varies widely when it comes to formatting matters.  Best is to see if you can grok the coding style implemented by this tool, edit the results you do not like, or learn to visually recognise cases for which this tool does not satisfy you and avoid using it for them.  I could have addressed many coding styles, but this would require lots of programmtic switches and knobs, and make the internal code more complex than it is, with likely not much practical gain.  But I'm a good guy and users might convince me otherwise ☺.
+
+Another reason is that some internal heuristics are used to guarantee reasonable reformatting speed by pruning the overall tree of formatting possibilities.  I may likely adapt these heuristics according to my own needs, if users report cases of severe mis-formatting, or even submit (nice and tractable!) patches implementing better heuristics.  Such things are not easy: this tool already consumes a noticeable amount of CPU and memory, and is better avoided on smallish systems.
+
+Two caveats are in order regarding the reformatting of numbers:
+
+- Integer numbers are always produced in decimal notation, even if the original number was using octal or hexadecimal notation.  The value is always correct, however.
+
+- Floating numbers are mangled in two ways.  First is that the exact representation used by the user (exponents, zeroes after point meant to indicate precision, etc.) is lost through the process.  Second, and more serious, is that the floating number value is /sometimes/ lost through the process, due to a bug (either in Python *compiler* module, or in Vim itself, I do not have a clue yet).  For this second problem, whenever a reformatted line contained a floating number, due warnings are produced.
+
+The original representation of a string (raw, single or double quotes, triple-quotes, etc.) is lost through reformatting, yet the contents of the produced string is guaranteed equivalent to the original.
