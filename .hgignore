@@ -1,0 +1,6 @@
+syntax: glob
+*.mo
+*.pyc
+build
+GNUmakefile
+admin/
