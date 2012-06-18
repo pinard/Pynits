@@ -118,9 +118,6 @@ There are three sets of commands in this tool.  A first set takes an entire line
 All Pynits commands start with the =<LocalLeader>=, which is =\= if the user did not change it.  All mapping equivalence tables, below, assume that the local leader has not been set to some other value.  You should change your reading of these maps if the leader happens to be different.
 
 This tool complies with the '=textwidth=' Vim option for the line length, but uses 80 if that option is set to zero.  The '=shiftwidth=' option also gives the number of columns per indentation step.
-
-Pynits is internally documented in French.  It is internationalised however, and produces English messages by default.  If the *LANG* environment variable is set to =fr=, messages will show in French.
-
 ** Reformatting Python code
 
 The following commands distinguish between a set of white lines, a block of comments, or a group of physical lines representing a logical line of Python code.  They all have the purpose of producing a possibly different formatting of the same while preserving the execution semantics.
@@ -130,7 +127,7 @@ If the cursor is on a white line, surrounding white lines are considered extrane
 Mapping equivalences:
 
 | \b | <Plug>Pynits\_column\_layout        |
-| \c | <Plug>Pynits\_column\_fill_layout   |
+| \c | <Plug>Pynits\_column\_fill\_layout  |
 | \l | <Plug>Pynits\_line\_layout          |
 | \p | <Plug>Pynits\_retract\_layout       |
 | \q | <Plug>Pynits\_retract\_fill\_layout |
@@ -168,7 +165,7 @@ This tool does not like in-line comments.  All comments are extracted out of a P
 
 Mapping equivalences:
 
-| \f | <Plug>Pynits\_choose_filling\_tool |
+| \f | <Plug>Pynits\_choose\_filling\_tool |
 
 Command =\f= cycles through a few refilling algorithms for comments.  By default, comment refilling is effected through the GNU *fmt* program, which needs to be installed in the system for this procedure to work (most Linux systems have it bundled already): it seems to me that wherever it fits, this is the tool producing the nicest output.  The second algorithm uses the *par* program, which despite yielding results a bit less nice than *fmt*, is more clever in some circumstances of complex quoting or so-called boxed comments.  The third algorithm uses the Vim built-in paragraph reformatter, which seems a bit less interesting, but it may only be that I have not studied it very much yet.  The fourth and last algorithm is the *textwrap* module from the Python 2.3 distribution; in practice so far, it does not seem fully up to the task.
 
@@ -201,8 +198,8 @@ The Python line reformatter may sometimes produce output which may be nit-picked
 
 Mapping equivalences:
 
-| \" | <Plug>Pynits\_force\_double_quotes |
-| \' | <Plug>Pynits\_force\_single_quotes |
+| \" | <Plug>Pynits\_force\_double\_quotes |
+| \' | <Plug>Pynits\_force\_single\_quotes |
 | \( | <Plug>Pynits\_add\_parentheses     |
 | \) | <Plug>Pynits\_remove\_parentheses  |
 
