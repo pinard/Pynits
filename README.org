@@ -1,6 +1,7 @@
 #+TITLE: Pynits — Notes
 #+OPTIONS: H:3
 #+SETUPFILE: ~/fp/notes/setup/pynits.org
+#+INCLUDE: ~/fp/notes/setup/jqindex.org
 
 #+BEGIN_QUOTE
 [2012-05-31 jeu] I recently began to foresee that Pynits could be of some use in a project I'll be working on.  I'm not sure yet it is worth undusting.  To ponder this, I first extracted Pynits from FP etc. into its own GitHub project.  The next main steps would likely be the adaptation to the newer AST module, the design of some Pymacs interface so Pynits could be used from Emacs as well as from Vim, and of course, lots of testing and debugging.  I suspect that Python 2 versus Python 3 would create some more difficulties.  In any case, if this cannot be done reasonably quickly, which I'll soon began to evaluate, Pynits might return to hibernation for some while…
