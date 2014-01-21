@@ -1,3 +1,5 @@
+*~
 *.mo
 *.pyc
-build
+build/
+html/
